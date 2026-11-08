@@ -1,0 +1,59 @@
+﻿{
+  "itemGroup.velorise_staves": "Velorise's Staves",
+
+  "item.velorise_staves.dragonfire_scepter": "Dragonfire Scepter",
+  "item.velorise_staves.dragonfire_scepter.desc": "Hurls concentrated dragon breath that leaves a lingering mystic flame cloud.",
+  
+  "item.velorise_staves.resonant_echo": "Resonant Echo",
+  "item.velorise_staves.resonant_echo.desc": "Channels the devastating sonic boom of the Warden to pierce through enemies.",
+
+  "item.velorise_staves.inferno_rod": "Inferno Rod",
+  "item.velorise_staves.inferno_rod.desc": "Unleashes rapid blaze fireballs in quick succession.",
+
+  "item.velorise_staves.ghastfire_staff": "Ghastfire Staff",
+  "item.velorise_staves.ghastfire_staff.desc": "Launches explosive ghast fireballs that detonate on impact.",
+
+  "item.velorise_staves.wither_scepter": "Wither Scepter",
+  "item.velorise_staves.wither_scepter.desc": "Fires a spread of wither skulls that inflict the deadly wither decay.",
+
+  "item.velorise_staves.shulker_seeker": "Shulker Seeker",
+  "item.velorise_staves.shulker_seeker.desc": "Shoots homing shulker bullets that inflict levitation upon targets.",
+
+  "item.velorise_staves.guardian_lens": "Guardian Lens",
+  "item.velorise_staves.guardian_lens.desc": "Focuses a sustained guardian heat ray onto the target in your sights.",
+
+  "item.velorise_staves.evoker_fang_staff": "Evoker Fang Staff",
+  "item.velorise_staves.evoker_fang_staff.desc": "Summons a piercing wave of evoker fangs erupting from the ground.",
+
+  "item.velorise_staves.stormcaller": "Stormcaller",
+  "item.velorise_staves.stormcaller.desc": "Calls down lightning strikes from the heavens upon your target.",
+
+  "item.velorise_staves.frostbolt_wand": "Frostbolt Wand",
+  "item.velorise_staves.frostbolt_wand.desc": "Fires freezing orbs that chill and severely slow enemies.",
+
+  "item.velorise_staves.webcaster": "Webcaster",
+  "item.velorise_staves.webcaster.desc": "Launches a cluster of dense webs that traps and poisons foes.",
+
+  "item.velorise_staves.void_translocator": "Void Translocator",
+  "item.velorise_staves.void_translocator.desc": "Instantly teleports you forward to the surface you are looking at.",
+
+  "item.velorise_staves.magic_mirror": "Magic Mirror",
+  "item.velorise_staves.magic_mirror.desc": "Hold right-click to channel and teleport back to your spawn point or bed.",
+
+  "item.velorise_staves.attraction_catalyst": "Attraction Catalyst",
+  "item.velorise_staves.attraction_catalyst.desc": "Right-click to toggle a magnetic field that pulls dropped items and experience orbs.",
+
+  "tooltip.velorise_staves.active": "§aActive",
+  "tooltip.velorise_staves.inactive": "§7Inactive",
+  "tooltip.velorise_staves.cooldown": "§8Cooldown: §7%ss",
+  "tooltip.velorise_staves.toggle_hint": "§7Right-click to toggle: %s",
+
+  "message.velorise_staves.mirror_teleport": "§aTeleported home!",
+  "message.velorise_staves.mirror_no_spawn": "§cNo respawn point found; returning to world spawn.",
+  "message.velorise_staves.translocator_blocked": "§cDestination is obstructed or out of range.",
+  "message.velorise_staves.catalyst_enabled": "§aAttraction Catalyst enabled.",
+  "message.velorise_staves.catalyst_disabled": "§cAttraction Catalyst disabled.",
+
+  "subtitles.velorise_staves.magic_mirror_use": "Magic Mirror chimes"
+}
+

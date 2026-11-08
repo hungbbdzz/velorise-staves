@@ -1,0 +1,24 @@
+﻿{
+    "key":  {
+                "C":  {
+                          "item":  "minecraft:prismarine_shard"
+                      },
+                "E":  {
+                          "item":  "minecraft:eye_of_ender"
+                      },
+                "P":  {
+                          "item":  "minecraft:prismarine_crystals"
+                      }
+            },
+    "pattern":  [
+                    " P ",
+                    " E ",
+                    " C "
+                ],
+    "result":  {
+                   "id":  "velorise_staves:guardian_lens",
+                   "count":  1
+               },
+    "type":  "minecraft:crafting_shaped"
+}
+
