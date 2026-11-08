@@ -1,0 +1,24 @@
+﻿{
+    "type":  "minecraft:crafting_shaped",
+    "category":  "equipment",
+    "pattern":  [
+                    " DB",
+                    "DCD",
+                    "BD "
+                ],
+    "key":  {
+                "D":  {
+                          "item":  "minecraft:diamond"
+                      },
+                "C":  {
+                          "item":  "minecraft:diamond_block"
+                      },
+                "B":  {
+                          "item":  "minecraft:glass"
+                      }
+            },
+    "result":  {
+                   "item":  "velorise_staves:magic_mirror",
+                   "count":  1
+               }
+}

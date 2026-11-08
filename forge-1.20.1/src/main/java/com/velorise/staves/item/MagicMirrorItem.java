@@ -1,0 +1,139 @@
+package com.velorise.staves.item;
+
+import com.velorise.staves.VeloriseStavesMod;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Optional;
+
+/** Recall artifact that channels and returns the player to their bed or spawn. */
+public class MagicMirrorItem extends Item {
+    private static final int USE_DURATION_TICKS = 30; // 1.5 seconds
+    private static final int COOLDOWN_TICKS = 100; // 5 seconds
+
+    private record Target(ServerLevel level, Vec3 pos, float angle, boolean bedObstructed) {}
+
+    public MagicMirrorItem(int maxDurability) {
+        super(new Item.Properties().stacksTo(1).durability(maxDurability));
+    }
+
+    private Target resolveTarget(ServerPlayer player) {
+        BlockPos respawnPosition = player.getRespawnPosition();
+        ServerLevel targetLevel = player.server.getLevel(player.getRespawnDimension());
+        if (targetLevel == null) targetLevel = player.server.overworld();
+        boolean bedObstructed = false;
+        Vec3 targetPos;
+        float angle = 0.0F;
+
+        if (respawnPosition != null) {
+            Optional<Vec3> position = Player.findRespawnPositionAndUseSpawnBlock(
+                targetLevel, respawnPosition, player.getRespawnAngle(), player.isRespawnForced(), true
+            );
+            if (position.isPresent()) {
+                targetPos = position.get();
+                angle = player.getRespawnAngle();
+            } else {
+                bedObstructed = true;
+                targetPos = Vec3.atBottomCenterOf(targetLevel.getSharedSpawnPos());
+            }
+        } else {
+            targetLevel = player.server.overworld();
+            targetPos = Vec3.atBottomCenterOf(targetLevel.getSharedSpawnPos());
+        }
+
+        return new Target(targetLevel, targetPos, angle, bedObstructed);
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (player.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(stack);
+
+        player.startUsingItem(hand);
+        return InteractionResultHolder.consume(stack);
+    }
+
+    @Override
+    public int getUseDuration(ItemStack stack) {
+        return USE_DURATION_TICKS;
+    }
+
+    @Override
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.NONE;
+    }
+
+    @Override
+    public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int count) {
+        if (!level.isClientSide() && entity instanceof ServerPlayer player) {
+            if (count % 3 == 0) player.swing(player.getUsedItemHand(), true);
+            if (count % 5 == 0) {
+                ((ServerLevel) player.level()).sendParticles(
+                    ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 10, 0.3, 0.5, 0.3, 0.15
+                );
+            }
+            if (count % 20 == 0) {
+                player.playNotifySound(VeloriseStavesMod.MAGIC_MIRROR_USE_SOUND.get(), SoundSource.PLAYERS, 0.4F, 1.5F);
+            }
+        }
+    }
+
+    @Override
+    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+        if (!level.isClientSide() && entity instanceof ServerPlayer player) {
+            Target target = resolveTarget(player);
+            if (target == null || target.level == null) {
+                player.displayClientMessage(Component.translatable("message.velorise_staves.mirror_no_spawn"), true);
+                return stack;
+            }
+
+            ServerLevel departure = (ServerLevel) player.level();
+            departure.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.5, 0.5, 0.5, 0.5);
+            departure.playSound(null, player.blockPosition(), VeloriseStavesMod.MAGIC_MIRROR_USE_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+
+            player.teleportTo(target.level, target.pos.x, target.pos.y, target.pos.z, target.angle, 0.0F);
+
+            target.level.sendParticles(ParticleTypes.PORTAL, target.pos.x, target.pos.y + 1.0, target.pos.z, 30, 0.5, 0.5, 0.5, 0.5);
+            target.level.playSound(null, target.pos.x, target.pos.y, target.pos.z, VeloriseStavesMod.MAGIC_MIRROR_USE_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+
+            if (target.bedObstructed) {
+                player.displayClientMessage(Component.translatable("message.velorise_staves.mirror_no_spawn"), false);
+            } else {
+                player.displayClientMessage(Component.translatable("message.velorise_staves.mirror_teleport"), true);
+            }
+
+            stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+            player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
+        }
+        return stack;
+    }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+        tooltip.add(Component.translatable(getDescriptionId() + ".desc").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("tooltip.velorise_staves.cooldown", String.format("%.1f", COOLDOWN_TICKS / 20.0F)));
+    }
+}

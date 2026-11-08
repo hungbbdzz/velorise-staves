@@ -40,19 +40,11 @@
   "item.velorise_staves.magic_mirror": "Gương Ma Thuật",
   "item.velorise_staves.magic_mirror.desc": "Giữ chuột phải để niệm chú quay về điểm hồi sinh hoặc giường của bạn.",
 
-  "item.velorise_staves.attraction_catalyst": "Nam Châm Hút Vật Phẩm",
-  "item.velorise_staves.attraction_catalyst.desc": "Chuột phải để bật/tắt từ trường hút các vật phẩm rơi và hạt kinh nghiệm xung quanh.",
-
-  "tooltip.velorise_staves.active": "§aĐang Bật",
-  "tooltip.velorise_staves.inactive": "§7Đang Tắt",
   "tooltip.velorise_staves.cooldown": "§8Hồi chiêu: §7%ss",
-  "tooltip.velorise_staves.toggle_hint": "§7Chuột phải để bật/tắt: %s",
 
   "message.velorise_staves.mirror_teleport": "§aĐã dịch chuyển về nhà!",
   "message.velorise_staves.mirror_no_spawn": "§cKhông tìm thấy điểm hồi sinh; đưa về điểm xuất phát thế giới.",
   "message.velorise_staves.translocator_blocked": "§cVị trí bị cản trở hoặc ngoài tầm với.",
-  "message.velorise_staves.catalyst_enabled": "§aĐã bật Nam Châm Hút Vật Phẩm.",
-  "message.velorise_staves.catalyst_disabled": "§cĐã tắt Nam Châm Hút Vật Phẩm.",
 
   "subtitles.velorise_staves.magic_mirror_use": "Gương Ma Thuật ngân vang"
 }

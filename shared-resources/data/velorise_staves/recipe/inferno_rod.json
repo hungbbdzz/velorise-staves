@@ -1,24 +1,21 @@
 ﻿{
+    "type":  "minecraft:crafting_shaped",
+    "category":  "equipment",
+    "pattern":  [
+                    "  F",
+                    " B ",
+                    "B  "
+                ],
     "key":  {
                 "F":  {
                           "item":  "minecraft:fire_charge"
-                      },
-                "M":  {
-                          "item":  "minecraft:magma_cream"
                       },
                 "B":  {
                           "item":  "minecraft:blaze_rod"
                       }
             },
-    "pattern":  [
-                    "  F",
-                    " B ",
-                    "M  "
-                ],
     "result":  {
                    "id":  "velorise_staves:inferno_rod",
                    "count":  1
-               },
-    "type":  "minecraft:crafting_shaped"
+               }
 }
-

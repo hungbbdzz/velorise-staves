@@ -4,7 +4,7 @@
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen.svg)](https://minecraft.net/)
 [![NeoForge](https://img.shields.io/badge/Modloader-NeoForge-orange.svg)](https://neoforged.net/)
 
-A lightweight, standalone Minecraft mod that introduces **11 elemental & mob-themed combat staves** and **3 utility magic artifacts**. 
+A lightweight, standalone Minecraft mod that introduces **11 elemental & mob-themed combat staves** and **2 utility magic artifacts**. 
 
 No complex mana systems, no bloated tiers, and no EMC — just pure, satisfying magic powered by **Vanilla Durability & Cooldowns**, fully enchantable with `Unbreaking` and `Mending`.
 
@@ -28,7 +28,6 @@ No complex mana systems, no bloated tiers, and no EMC — just pure, satisfying 
 ### 🌟 Utility & Mobility Artifacts
 - **Void Translocator**: Blink forward up to 24 blocks through obstacles safely.
 - **Magic Mirror**: Hold right-click to channel and recall back to your bed or world spawn point.
-- **Attraction Catalyst**: Right-click to toggle a magnetic vacuum that smoothly pulls nearby dropped items and experience orbs to you.
 
 ---
 

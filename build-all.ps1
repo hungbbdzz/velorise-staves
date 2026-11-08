@@ -99,6 +99,7 @@ function Invoke-Build(
 }
 
 try {
+    Invoke-Build -DisplayName "Forge 1.20.1" -Folder "forge-1.20.1" -JavaEnvVar "JAVA17_HOME" -ArtifactPattern "*forge*.jar"
     Invoke-Build -DisplayName "NeoForge 1.21.1" -Folder "neoforge-1.21.1" -JavaEnvVar "JAVA21_HOME" -ArtifactPattern "*neoforge*.jar"
 
     Write-Host "`n==================================================" -ForegroundColor Green
