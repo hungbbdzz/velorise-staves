@@ -1,0 +1,130 @@
+package com.velorise.staves.item;
+
+import com.velorise.staves.VeloriseStavesMod;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
+
+/** Recall artifact that channels and returns the player to their bed or spawn. */
+public class MagicMirrorItem extends Item {
+    private static final int USE_DURATION_TICKS = 50; // 2.5 seconds
+    private static final int COOLDOWN_TICKS = 300; // 15.0 seconds
+    private final boolean isNetherite;
+
+    private record Target(ServerLevel level, Vec3 pos, float angle, boolean bedObstructed) {}
+
+    public MagicMirrorItem(int maxDurability) {
+        this(maxDurability, false);
+    }
+
+    public MagicMirrorItem(int maxDurability, boolean isNetherite) {
+        super(isNetherite
+            ? new Item.Properties().stacksTo(1).durability(maxDurability).fireResistant()
+            : new Item.Properties().stacksTo(1).durability(maxDurability));
+        this.isNetherite = isNetherite;
+    }
+
+    public boolean isNetherite() {
+        return isNetherite;
+    }
+
+    private Target resolveTarget(ServerPlayer player) {
+        boolean hadRespawn = player.getRespawnPosition() != null;
+        DimensionTransition transition = player.findRespawnPositionAndUseSpawnBlock(true, DimensionTransition.DO_NOTHING);
+        return new Target(
+            transition.newLevel(), transition.pos(), transition.yRot(),
+            hadRespawn && transition.missingRespawnBlock()
+        );
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (player.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(stack);
+
+        player.startUsingItem(hand);
+        return InteractionResultHolder.consume(stack);
+    }
+
+    @Override
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
+        return USE_DURATION_TICKS;
+    }
+
+    @Override
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.NONE;
+    }
+
+    @Override
+    public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int count) {
+        if (!level.isClientSide() && entity instanceof ServerPlayer player) {
+            if (count % 3 == 0) player.swing(player.getUsedItemHand(), true);
+            if (count % 5 == 0) {
+                ((ServerLevel) player.level()).sendParticles(
+                    ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 10, 0.3, 0.5, 0.3, 0.15
+                );
+            }
+            if (count % 20 == 0) {
+                player.playNotifySound(VeloriseStavesMod.MAGIC_MIRROR_USE_SOUND, SoundSource.PLAYERS, 0.4F, 1.5F);
+            }
+        }
+    }
+
+    @Override
+    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+        if (!level.isClientSide() && entity instanceof ServerPlayer player) {
+            Target target = resolveTarget(player);
+            if (target == null || target.level == null) {
+                player.displayClientMessage(Component.translatable("message.velorise_staves.mirror_no_spawn"), true);
+                return stack;
+            }
+
+            if (!isNetherite && player.serverLevel() != target.level) {
+                player.displayClientMessage(Component.translatable("message.velorise_staves.mirror_dimension_blocked"), true);
+                return stack;
+            }
+
+            ServerLevel departure = player.serverLevel();
+            departure.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.5, 0.5, 0.5, 0.5);
+            departure.playSound(null, player.blockPosition(), VeloriseStavesMod.MAGIC_MIRROR_USE_SOUND, SoundSource.PLAYERS, 1.0F, 1.0F);
+
+            player.teleportTo(target.level, target.pos.x, target.pos.y, target.pos.z, target.angle, 0.0F);
+
+            target.level.sendParticles(ParticleTypes.PORTAL, target.pos.x, target.pos.y + 1.0, target.pos.z, 30, 0.5, 0.5, 0.5, 0.5);
+            target.level.playSound(null, target.pos.x, target.pos.y, target.pos.z, VeloriseStavesMod.MAGIC_MIRROR_USE_SOUND, SoundSource.PLAYERS, 1.0F, 1.0F);
+
+            if (target.bedObstructed) {
+                player.displayClientMessage(Component.translatable("message.velorise_staves.mirror_no_spawn"), false);
+            } else {
+                player.displayClientMessage(Component.translatable("message.velorise_staves.mirror_teleport"), true);
+            }
+
+            stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(player.getUsedItemHand()));
+            player.getCooldowns().addCooldown(this, COOLDOWN_TICKS);
+        }
+        return stack;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        tooltip.add(Component.translatable(getDescriptionId() + ".desc").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("tooltip.velorise_staves.cooldown", String.format("%.1f", COOLDOWN_TICKS / 20.0F)));
+    }
+}

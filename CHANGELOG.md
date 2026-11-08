@@ -27,8 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Void Translocator`: Safe forward blink teleportation.
   - `Magic Mirror`: Channeled recall home to bed or world spawn.
 - **Multi-Loader Support**:
+  - Added **Fabric 1.21.1** port (`fabric-1.21.1`, Java 21) with full parity across all 26 items, custom Mixin hit interception, and ModMenu/JEI support.
   - Added **Forge 1.20.1** port (`forge-1.20.1`, Java 17).
   - Added **NeoForge 1.21.1** loader (`neoforge-1.21.1`, Java 21).
+  - Automated build & export script (`build-all.ps1`) for Forge, NeoForge, and Fabric.
   - Built-in JEI dev integration for rapid recipe inspection.
 - Balanced around **Vanilla Cooldowns & Durability** (fully compatible with `Unbreaking` and `Mending`).
   - Combat staves cooldowns rebalanced to 4.0s - 8.0s for authentic tactical magic pacing.

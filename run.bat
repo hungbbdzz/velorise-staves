@@ -12,6 +12,7 @@ echo                VELORISE'S STAVES - CLIENT LAUNCHER
 echo =====================================================================
 echo   1) NeoForge 1.21.1  (Java 21)
 echo   2) Forge 1.20.1     (Java 17)
+echo   3) Fabric 1.21.1    (Java 21)
 echo.
 echo   0) Exit
 echo ---------------------------------------------------------------------
@@ -25,6 +26,11 @@ if "%CHOICE%"=="1" (
 
 if "%CHOICE%"=="2" (
     call "%~dp0scripts\run-forge-1.20.1.bat"
+    exit /b %ERRORLEVEL%
+)
+
+if "%CHOICE%"=="3" (
+    call "%~dp0scripts\run-fabric.bat"
     exit /b %ERRORLEVEL%
 )
 
