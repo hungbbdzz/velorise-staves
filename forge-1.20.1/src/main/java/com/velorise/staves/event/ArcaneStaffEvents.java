@@ -61,20 +61,22 @@ public final class ArcaneStaffEvents {
         }
 
         Entity owner = projectile.getOwner();
+        boolean isNetherite = kind.startsWith("netherite_");
+        String baseKind = isNetherite ? kind.substring("netherite_".length()) : kind;
 
-        if ("ghastfire".equals(kind)) {
-            resolveGhastfire(level, hit, owner);
+        if ("ghastfire".equals(baseKind)) {
+            resolveGhastfire(level, hit, owner, isNetherite);
             return;
         }
 
         event.setCanceled(true);
-        switch (kind) {
-            case "dragonfire" -> resolveDragonfire(level, hit, owner);
-            case "inferno" -> resolveInferno(level, hit, owner, event);
-            case "wither" -> resolveWither(level, hit, owner);
-            case "shulker" -> resolveShulker(level, hit, owner, event);
-            case "frost" -> resolveFrost(level, hit, owner, event);
-            case "web" -> resolveWeb(level, hit, owner, event);
+        switch (baseKind) {
+            case "dragonfire" -> resolveDragonfire(level, hit, owner, isNetherite);
+            case "inferno" -> resolveInferno(level, hit, owner, event, isNetherite);
+            case "wither" -> resolveWither(level, hit, owner, isNetherite);
+            case "shulker" -> resolveShulker(level, hit, owner, event, isNetherite);
+            case "frost" -> resolveFrost(level, hit, owner, event, isNetherite);
+            case "web" -> resolveWeb(level, hit, owner, event, isNetherite);
             default -> {}
         }
         projectile.discard();
@@ -89,77 +91,87 @@ public final class ArcaneStaffEvents {
         }
     }
 
-    private static void resolveDragonfire(ServerLevel level, Vec3 hit, Entity owner) {
+    private static void resolveDragonfire(ServerLevel level, Vec3 hit, Entity owner, boolean isNetherite) {
         AreaEffectCloud cloud = new AreaEffectCloud(level, hit.x, hit.y, hit.z);
         if (owner instanceof LivingEntity living) {
             cloud.setOwner(living);
         }
         cloud.setParticle(ParticleTypes.DRAGON_BREATH);
-        cloud.setRadius(3.5F);
+        float radius = isNetherite ? 4.5F : 3.5F;
+        cloud.setRadius(radius);
         cloud.setDuration(120); // 6 seconds
-        cloud.setRadiusPerTick((4.5F - cloud.getRadius()) / (float) cloud.getDuration());
+        cloud.setRadiusPerTick(((radius + 1.0F) - cloud.getRadius()) / (float) cloud.getDuration());
         cloud.setWaitTime(10);
-        cloud.addEffect(new MobEffectInstance(MobEffects.HARM, 1, 1));
+        cloud.addEffect(new MobEffectInstance(MobEffects.HARM, 1, isNetherite ? 1 : 0));
         level.addFreshEntity(cloud);
         level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.9F, 1.15F);
     }
 
-    private static void resolveInferno(ServerLevel level, Vec3 hit, Entity owner, ProjectileImpactEvent event) {
+    private static void resolveInferno(ServerLevel level, Vec3 hit, Entity owner, ProjectileImpactEvent event, boolean isNetherite) {
         LivingEntity target = hitEntity(event);
         if (target != null && target != owner) {
-            target.setSecondsOnFire(4);
-            target.hurt(level.damageSources().magic(), 6.0F);
+            target.setSecondsOnFire(isNetherite ? 6 : 4);
+            target.hurt(level.damageSources().magic(), isNetherite ? 8.0F : 6.0F);
         }
-        level.sendParticles(ParticleTypes.FLAME, hit.x, hit.y, hit.z, 25, 0.3D, 0.3D, 0.3D, 0.04D);
+        level.sendParticles(ParticleTypes.FLAME, hit.x, hit.y, hit.z, isNetherite ? 35 : 25, 0.3D, 0.3D, 0.3D, 0.04D);
         level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.8F, 1.0F);
     }
 
-    private static void resolveGhastfire(ServerLevel level, Vec3 hit, Entity owner) {
-        double radius = 3.5D;
-        float damage = 12.0F;
+    private static void resolveGhastfire(ServerLevel level, Vec3 hit, Entity owner, boolean isNetherite) {
+        double radius = isNetherite ? 4.5D : 3.5D;
+        float damage = isNetherite ? 16.0F : 12.0F;
         List<LivingEntity> affected = targets(level, hit, radius, owner);
         for (LivingEntity target : affected) {
-            target.setSecondsOnFire(5);
+            target.setSecondsOnFire(isNetherite ? 6 : 5);
             target.hurt(level.damageSources().magic(), damage);
         }
-        level.sendParticles(ParticleTypes.FLAME, hit.x, hit.y, hit.z, 35,
+        level.sendParticles(ParticleTypes.FLAME, hit.x, hit.y, hit.z, isNetherite ? 45 : 35,
             radius * 0.35D, radius * 0.25D, radius * 0.35D, 0.05D);
     }
 
-    private static void resolveWither(ServerLevel level, Vec3 hit, Entity owner) {
-        double radius = 3.0D;
-        float damage = 8.0F;
+    private static void resolveWither(ServerLevel level, Vec3 hit, Entity owner, boolean isNetherite) {
+        double radius = isNetherite ? 4.0D : 3.0D;
+        float damage = isNetherite ? 10.0F : 8.0F;
         for (LivingEntity target : targets(level, hit, radius, owner)) {
             target.hurt(level.damageSources().magic(), damage);
-            target.addEffect(new MobEffectInstance(MobEffects.WITHER, 100, 1));
+            target.addEffect(new MobEffectInstance(MobEffects.WITHER, 120, isNetherite ? 2 : 1));
         }
-        level.sendParticles(ParticleTypes.SMOKE, hit.x, hit.y, hit.z, 30,
+        level.sendParticles(ParticleTypes.SMOKE, hit.x, hit.y, hit.z, isNetherite ? 40 : 30,
             radius * 0.4D, radius * 0.35D, radius * 0.4D, 0.04D);
         level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.WITHER_BREAK_BLOCK, SoundSource.PLAYERS, 0.8F, 1.2F);
     }
 
-    private static void resolveShulker(ServerLevel level, Vec3 hit, Entity owner, ProjectileImpactEvent event) {
+    private static void resolveShulker(ServerLevel level, Vec3 hit, Entity owner, ProjectileImpactEvent event, boolean isNetherite) {
         LivingEntity target = hitEntity(event);
         if (target != null && target != owner) {
-            target.hurt(level.damageSources().magic(), 8.0F);
-            target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 100, 0));
+            target.hurt(level.damageSources().magic(), isNetherite ? 10.0F : 8.0F);
+            target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, isNetherite ? 120 : 100, 0));
         }
         level.sendParticles(ParticleTypes.END_ROD, hit.x, hit.y, hit.z, 16, 0.25D, 0.25D, 0.25D, 0.03D);
         level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.SHULKER_BULLET_HIT, SoundSource.PLAYERS, 0.8F, 1.0F);
     }
 
-    private static void resolveFrost(ServerLevel level, Vec3 hit, Entity owner, ProjectileImpactEvent event) {
+    private static void resolveFrost(ServerLevel level, Vec3 hit, Entity owner, ProjectileImpactEvent event, boolean isNetherite) {
         LivingEntity target = hitEntity(event);
         if (target != null && target != owner) {
-            target.hurt(level.damageSources().freeze(), 6.0F);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 1));
-            target.setTicksFrozen(Math.max(target.getTicksFrozen(), 140));
+            target.hurt(level.damageSources().freeze(), isNetherite ? 8.0F : 6.0F);
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, isNetherite ? 100 : 80, 1));
+            target.setTicksFrozen(Math.max(target.getTicksFrozen(), isNetherite ? 180 : 140));
         }
-        level.sendParticles(ParticleTypes.SNOWFLAKE, hit.x, hit.y, hit.z, 20, 0.3D, 0.3D, 0.3D, 0.025D);
+        if (isNetherite) {
+            for (LivingEntity splashTarget : targets(level, hit, 2.0D, owner)) {
+                if (splashTarget != target) {
+                    splashTarget.hurt(level.damageSources().freeze(), 4.0F);
+                    splashTarget.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0));
+                    splashTarget.setTicksFrozen(100);
+                }
+            }
+        }
+        level.sendParticles(ParticleTypes.SNOWFLAKE, hit.x, hit.y, hit.z, isNetherite ? 30 : 20, 0.3D, 0.3D, 0.3D, 0.025D);
         level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 0.65F, 1.6F);
     }
 
-    private static void resolveWeb(ServerLevel level, Vec3 hit, Entity owner, ProjectileImpactEvent event) {
+    private static void resolveWeb(ServerLevel level, Vec3 hit, Entity owner, ProjectileImpactEvent event, boolean isNetherite) {
         BlockPos pos;
         if (event.getRayTraceResult() instanceof EntityHitResult entityHit) {
             pos = entityHit.getEntity().blockPosition();
@@ -168,8 +180,8 @@ public final class ArcaneStaffEvents {
         } else {
             pos = BlockPos.containing(hit);
         }
-        int webTicks = 100; // 5s
-        int poisonAmplifier = 0;
+        int webTicks = isNetherite ? 140 : 100;
+        int poisonAmplifier = isNetherite ? 1 : 0;
         java.util.UUID webOwner = owner instanceof ServerPlayer player ? player.getUUID() : null;
         if (!TemporaryWebManager.place(level, pos, webTicks, poisonAmplifier, webOwner)) {
             TemporaryWebManager.place(level, pos.above(), webTicks, poisonAmplifier, webOwner);
@@ -178,14 +190,14 @@ public final class ArcaneStaffEvents {
         level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.7F, 1.5F);
     }
 
-    public static void resolveLightning(ServerLevel level, Vec3 hit, ServerPlayer owner) {
-        double radius = 3.5D;
-        float damage = 10.0F;
+    public static void resolveLightning(ServerLevel level, Vec3 hit, ServerPlayer owner, boolean isNetherite) {
+        double radius = isNetherite ? 4.5D : 3.5D;
+        float damage = isNetherite ? 14.0F : 10.0F;
         for (LivingEntity target : targets(level, hit, radius, owner)) {
-            target.setSecondsOnFire(4);
+            target.setSecondsOnFire(isNetherite ? 5 : 4);
             target.hurt(level.damageSources().lightningBolt(), damage);
         }
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, hit.x, hit.y + 0.5D, hit.z, 30,
+        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, hit.x, hit.y + 0.5D, hit.z, isNetherite ? 40 : 30,
             radius * 0.35D, 0.8D, radius * 0.35D, 0.08D);
         level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.0F, 1.0F);
     }

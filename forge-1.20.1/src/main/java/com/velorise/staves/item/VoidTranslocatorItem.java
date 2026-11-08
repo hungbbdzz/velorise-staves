@@ -26,11 +26,28 @@ import java.util.List;
 
 /** Short-range blink teleportation tool powered by durability and cooldown. */
 public class VoidTranslocatorItem extends Item {
-    private static final double RANGE = 24.0D;
     private static final int COOLDOWN_TICKS = 100; // 5.0 seconds
+    private final double range;
+    private final boolean isNetherite;
 
     public VoidTranslocatorItem(int maxDurability) {
-        super(new Item.Properties().stacksTo(1).durability(maxDurability));
+        this(maxDurability, 24.0D, false);
+    }
+
+    public VoidTranslocatorItem(int maxDurability, double range, boolean isNetherite) {
+        super(isNetherite
+            ? new Item.Properties().stacksTo(1).durability(maxDurability).fireResistant()
+            : new Item.Properties().stacksTo(1).durability(maxDurability));
+        this.range = range;
+        this.isNetherite = isNetherite;
+    }
+
+    public boolean isNetherite() {
+        return isNetherite;
+    }
+
+    public double getRange() {
+        return range;
     }
 
     @Override
@@ -41,7 +58,7 @@ public class VoidTranslocatorItem extends Item {
         if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
             Vec3 start = player.getEyePosition();
             Vec3 look = player.getViewVector(1.0F);
-            Vec3 end = start.add(look.scale(RANGE));
+            Vec3 end = start.add(look.scale(this.range));
             BlockHitResult hitResult = level.clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
             Vec3 destination = resolveDestination(level, look, end, hitResult);
 
