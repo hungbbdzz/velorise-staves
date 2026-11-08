@@ -14,18 +14,13 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -92,20 +87,6 @@ public final class ArcaneStaffEvents {
         if (server != null) {
             DragonfireCloudManager.tick(server);
             TemporaryWebManager.tick(server);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onLivingDrops(LivingDropsEvent event) {
-        if (!(event.getEntity() instanceof Warden warden)) return;
-        if (!(warden.level() instanceof ServerLevel level)) return;
-        if (event.getSource().getEntity() instanceof ServerPlayer) {
-            if (level.random.nextFloat() < 0.25F) {
-                ItemEntity drop = new ItemEntity(level, warden.getX(), warden.getY() + 0.5D, warden.getZ(),
-                    new ItemStack(Items.ECHO_SHARD));
-                drop.setDefaultPickUpDelay();
-                event.getDrops().add(drop);
-            }
         }
     }
 
