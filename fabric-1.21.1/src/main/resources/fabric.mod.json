@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "velorise_staves",
+  "version": "${version}",
+  "name": "Velorise's Staves",
+  "description": "Vanilla-friendly magic staves and utility artifacts powered by durability and cooldowns.",
+  "authors": [
+    "hungbbdzz"
+  ],
+  "contact": {
+    "homepage": "https://github.com/hungbbdzz/velorise-staves",
+    "sources": "https://github.com/hungbbdzz/velorise-staves"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.velorise.staves.VeloriseStavesMod"
+    ]
+  },
+  "mixins": [
+    "velorise_staves.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "=${minecraft_version}",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
