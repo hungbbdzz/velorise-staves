@@ -32,4 +32,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Built-in JEI dev integration for rapid recipe inspection.
 - Balanced around **Vanilla Cooldowns & Durability** (fully compatible with `Unbreaking` and `Mending`).
 - Complete localization for English (`en_us`) and Vietnamese (`vi_vn`).
-- Added 25% Echo Shard drop chance when slaying Warden.
