@@ -33,4 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Balanced around **Vanilla Cooldowns & Durability** (fully compatible with `Unbreaking` and `Mending`).
   - Combat staves cooldowns rebalanced to 4.0s - 8.0s for authentic tactical magic pacing.
   - Mobility artifacts rebalanced: Void Translocator (5.0s cooldown), Magic Mirror (2.5s channel, 15.0s cooldown).
+- **Smithing Table Netherite Upgrade System**:
+  - All 13 staves and artifacts can now be upgraded at a Smithing Table using `Netherite Upgrade Template` + `Netherite Ingot`.
+  - Upgraded weapons receive the `Netherite + [Name]` title, custom Netherite textures/models, and fire-resistant trait (`fireResistant()`).
+  - Netherite tier features massively increased durability (500), amplified damage, enlarged AOE radiuses, and longer reach (Void Translocator blinks 36 blocks).
+  - Basic Magic Mirror is locked to intra-dimension recalls; Netherite Magic Mirror enables inter-dimensional recalls (e.g. Nether/End to Overworld).
+  - Basic staves durability rebalanced to 120-150 (Void: 80, Mirror: 40) to encourage upgrading.
 - Complete localization for English (`en_us`) and Vietnamese (`vi_vn`).

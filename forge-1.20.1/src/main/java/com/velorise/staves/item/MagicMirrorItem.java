@@ -28,11 +28,23 @@ import java.util.Optional;
 public class MagicMirrorItem extends Item {
     private static final int USE_DURATION_TICKS = 50; // 2.5 seconds
     private static final int COOLDOWN_TICKS = 300; // 15.0 seconds
+    private final boolean isNetherite;
 
     private record Target(ServerLevel level, Vec3 pos, float angle, boolean bedObstructed) {}
 
     public MagicMirrorItem(int maxDurability) {
-        super(new Item.Properties().stacksTo(1).durability(maxDurability));
+        this(maxDurability, false);
+    }
+
+    public MagicMirrorItem(int maxDurability, boolean isNetherite) {
+        super(isNetherite
+            ? new Item.Properties().stacksTo(1).durability(maxDurability).fireResistant()
+            : new Item.Properties().stacksTo(1).durability(maxDurability));
+        this.isNetherite = isNetherite;
+    }
+
+    public boolean isNetherite() {
+        return isNetherite;
     }
 
     private Target resolveTarget(ServerPlayer player) {
@@ -102,6 +114,11 @@ public class MagicMirrorItem extends Item {
             Target target = resolveTarget(player);
             if (target == null || target.level == null) {
                 player.displayClientMessage(Component.translatable("message.velorise_staves.mirror_no_spawn"), true);
+                return stack;
+            }
+
+            if (!isNetherite && player.level() != target.level) {
+                player.displayClientMessage(Component.translatable("message.velorise_staves.mirror_dimension_blocked"), true);
                 return stack;
             }
 

@@ -57,14 +57,26 @@ public final class ArcaneStaffItem extends Item {
     }
 
     private final Kind kind;
+    private final boolean isNetherite;
 
     public ArcaneStaffItem(Kind kind, int maxDurability) {
-        super(new Item.Properties().stacksTo(1).durability(maxDurability));
+        this(kind, maxDurability, false);
+    }
+
+    public ArcaneStaffItem(Kind kind, int maxDurability, boolean isNetherite) {
+        super(isNetherite
+            ? new Item.Properties().stacksTo(1).durability(maxDurability).fireResistant()
+            : new Item.Properties().stacksTo(1).durability(maxDurability));
         this.kind = kind;
+        this.isNetherite = isNetherite;
     }
 
     public Kind kind() {
         return kind;
+    }
+
+    public boolean isNetherite() {
+        return isNetherite;
     }
 
     @Override
@@ -188,7 +200,7 @@ public final class ArcaneStaffItem extends Item {
         if (kind == Kind.GUARDIAN) {
             int elapsed = 50 - count;
             if (elapsed <= 0 || elapsed % 5 != 0 || !(entity instanceof ServerPlayer player)) return;
-            LivingEntity target = findTarget(player, 24.0D, 1.2D);
+            LivingEntity target = findTarget(player, isNetherite ? 28.0D : 24.0D, 1.2D);
             fireGuardian(player, target);
             if (elapsed % 10 == 0) {
                 stack.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
@@ -226,47 +238,47 @@ public final class ArcaneStaffItem extends Item {
         player.awardStat(Stats.ITEM_USED.get(this));
     }
 
-    private static boolean shootDragonfire(ServerPlayer player) {
+    private boolean shootDragonfire(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         DragonFireball projectile = EntityType.DRAGON_FIREBALL.create(level);
         if (projectile == null) return false;
-        prepareProjectile(projectile, player, "dragonfire", 32.0D, 1.35F);
+        prepareProjectile(projectile, player, isNetherite ? "netherite_dragonfire" : "dragonfire", 32.0D, 1.35F);
         level.addFreshEntity(projectile);
         level.playSound(null, player.blockPosition(), SoundEvents.ENDER_DRAGON_SHOOT, SoundSource.PLAYERS, 0.9F, 1.0F);
         return true;
     }
 
-    private static boolean shootGhastfire(ServerPlayer player) {
+    private boolean shootGhastfire(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         LargeFireball projectile = EntityType.FIREBALL.create(level);
         if (projectile == null) return false;
-        prepareProjectile(projectile, player, "ghastfire", 36.0D, 1.2F);
+        prepareProjectile(projectile, player, isNetherite ? "netherite_ghastfire" : "ghastfire", 36.0D, 1.2F);
         level.addFreshEntity(projectile);
         level.playSound(null, player.blockPosition(), SoundEvents.GHAST_SHOOT, SoundSource.PLAYERS, 0.9F, 1.0F);
         return true;
     }
 
-    private static boolean shootInferno(ServerPlayer player) {
+    private boolean shootInferno(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         SmallFireball projectile = EntityType.SMALL_FIREBALL.create(level);
         if (projectile == null) return false;
-        prepareProjectile(projectile, player, "inferno", 30.0D, 1.5F);
+        prepareProjectile(projectile, player, isNetherite ? "netherite_inferno" : "inferno", 30.0D, 1.5F);
         level.addFreshEntity(projectile);
         level.playSound(null, player.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.9F, 1.0F);
         return true;
     }
 
-    private static boolean shootWither(ServerPlayer player) {
+    private boolean shootWither(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         WitherSkull projectile = EntityType.WITHER_SKULL.create(level);
         if (projectile == null) return false;
-        prepareProjectile(projectile, player, "wither", 32.0D, 1.35F);
+        prepareProjectile(projectile, player, isNetherite ? "netherite_wither" : "wither", 32.0D, 1.35F);
         level.addFreshEntity(projectile);
         level.playSound(null, player.blockPosition(), SoundEvents.WITHER_SHOOT, SoundSource.PLAYERS, 0.85F, 1.15F);
         return true;
     }
 
-    private static boolean shootShulker(ServerPlayer player) {
+    private boolean shootShulker(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         double range = 30.0D;
         LivingEntity target = findTarget(player, range, 1.5D);
@@ -284,7 +296,7 @@ public final class ArcaneStaffItem extends Item {
                 projectile.moveTo(spawnPos.x, spawnPos.y, spawnPos.z, player.getYRot(), player.getXRot());
                 projectile.setDeltaMovement(direction.scale(1.25D));
             }
-            prepareProjectile(projectile, player, "shulker", range, 1.25F, direction);
+            prepareProjectile(projectile, player, isNetherite ? "netherite_shulker" : "shulker", range, 1.25F, direction);
             level.addFreshEntity(projectile);
             spawned++;
         }
@@ -293,11 +305,12 @@ public final class ArcaneStaffItem extends Item {
         return true;
     }
 
-    private static boolean shootSnowball(ServerPlayer player, String kind, float velocity) {
+    private boolean shootSnowball(ServerPlayer player, String kind, float velocity) {
         ServerLevel level = player.serverLevel();
         Snowball projectile = EntityType.SNOWBALL.create(level);
         if (projectile == null) return false;
-        prepareProjectile(projectile, player, kind, 28.0D, velocity);
+        String tag = isNetherite ? "netherite_" + kind : kind;
+        prepareProjectile(projectile, player, tag, 28.0D, velocity);
         level.addFreshEntity(projectile);
         level.playSound(null, player.blockPosition(),
             "web".equals(kind) ? SoundEvents.SPIDER_AMBIENT : SoundEvents.SNOW_GOLEM_SHOOT,
@@ -325,13 +338,13 @@ public final class ArcaneStaffItem extends Item {
         return look.yRot((float)Math.toRadians(angle)).normalize();
     }
 
-    private static boolean castFangs(ServerPlayer player) {
+    private boolean castFangs(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         Vec3 direction = player.getLookAngle();
         Vec3 flat = new Vec3(direction.x, 0.0D, direction.z);
         if (flat.lengthSqr() < 0.001D) flat = new Vec3(0.0D, 0.0D, 1.0D);
         flat = flat.normalize();
-        int count = 9;
+        int count = isNetherite ? 13 : 9;
         float yaw = (float)Math.atan2(flat.z, flat.x);
 
         for (int i = 0; i < count; i++) {
@@ -358,9 +371,9 @@ public final class ArcaneStaffItem extends Item {
         return originY;
     }
 
-    private static boolean castLightning(ServerPlayer player) {
+    private boolean castLightning(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
-        double range = 32.0D;
+        double range = isNetherite ? 36.0D : 32.0D;
         LivingEntity target = findTarget(player, range, 1.3D);
         Vec3 impact = target != null ? target.getBoundingBox().getCenter() : rayEnd(player, range);
         LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
@@ -370,7 +383,7 @@ public final class ArcaneStaffItem extends Item {
             bolt.setVisualOnly(true);
             level.addFreshEntity(bolt);
         }
-        ArcaneStaffEvents.resolveLightning(level, impact, player);
+        ArcaneStaffEvents.resolveLightning(level, impact, player, isNetherite);
         return true;
     }
 
@@ -382,23 +395,24 @@ public final class ArcaneStaffItem extends Item {
         return hit.getType() == HitResult.Type.MISS ? end : hit.getLocation();
     }
 
-    private static void fireGuardian(ServerPlayer player, LivingEntity target) {
+    private void fireGuardian(ServerPlayer player, LivingEntity target) {
         ServerLevel level = player.serverLevel();
         Vec3 start = player.getEyePosition();
-        Vec3 end = target == null ? rayEnd(player, 24.0D) : target.getBoundingBox().getCenter();
+        double range = isNetherite ? 28.0D : 24.0D;
+        Vec3 end = target == null ? rayEnd(player, range) : target.getBoundingBox().getCenter();
         if (target != null) {
-            target.hurt(level.damageSources().magic(), 2.5F);
+            target.hurt(level.damageSources().magic(), isNetherite ? 3.5F : 2.5F);
         }
         drawBeam(level, start, end, ParticleTypes.ELECTRIC_SPARK, 0.45D);
         level.playSound(null, player.blockPosition(), SoundEvents.GUARDIAN_ATTACK, SoundSource.PLAYERS, 0.9F, 1.2F);
     }
 
-    private static void fireEcho(ServerPlayer player) {
+    private void fireEcho(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         Vec3 start = player.getEyePosition();
         Vec3 direction = player.getLookAngle().normalize();
-        double range = 28.0D;
-        double beamRadius = 2.0D;
+        double range = isNetherite ? 32.0D : 28.0D;
+        double beamRadius = isNetherite ? 2.5D : 2.0D;
         AABB search = player.getBoundingBox().expandTowards(direction.scale(range)).inflate(beamRadius + 1.0D);
 
         List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, search,
@@ -409,7 +423,7 @@ public final class ArcaneStaffItem extends Item {
             .sorted(Comparator.comparingDouble(target -> projection(start, direction, target.getBoundingBox().getCenter())))
             .toList();
 
-        float damage = 22.0F;
+        float damage = isNetherite ? 28.0F : 22.0F;
         for (LivingEntity target : targets) {
             target.hurt(level.damageSources().magic(), damage);
         }

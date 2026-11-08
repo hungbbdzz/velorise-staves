@@ -28,53 +28,95 @@ public final class VeloriseStavesMod {
     public static final Supplier<SoundEvent> MAGIC_MIRROR_USE_SOUND = SOUND_EVENTS.register("magic_mirror_use",
         () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(MODID, "magic_mirror_use")));
 
-    // Combat Staves
+    // Basic Combat Staves
     public static final Supplier<Item> DRAGONFIRE_SCEPTER = ITEMS.register("dragonfire_scepter",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.DRAGONFIRE, 500));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.DRAGONFIRE, 130, false));
 
     public static final Supplier<Item> RESONANT_ECHO = ITEMS.register("resonant_echo",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.ECHO, 450));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.ECHO, 130, false));
 
     public static final Supplier<Item> INFERNO_ROD = ITEMS.register("inferno_rod",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.INFERNO, 550));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.INFERNO, 150, false));
 
     public static final Supplier<Item> GHASTFIRE_STAFF = ITEMS.register("ghastfire_staff",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.GHASTFIRE, 400));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.GHASTFIRE, 120, false));
 
     public static final Supplier<Item> WITHER_SCEPTER = ITEMS.register("wither_scepter",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.WITHER, 450));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.WITHER, 140, false));
 
     public static final Supplier<Item> SHULKER_SEEKER = ITEMS.register("shulker_seeker",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.SHULKER, 450));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.SHULKER, 130, false));
 
     public static final Supplier<Item> GUARDIAN_LENS = ITEMS.register("guardian_lens",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.GUARDIAN, 500));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.GUARDIAN, 130, false));
 
     public static final Supplier<Item> EVOKER_FANG_STAFF = ITEMS.register("evoker_fang_staff",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.EVOKER, 400));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.EVOKER, 120, false));
 
     public static final Supplier<Item> STORMCALLER = ITEMS.register("stormcaller",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.LIGHTNING, 450));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.LIGHTNING, 130, false));
 
     public static final Supplier<Item> FROSTBOLT_WAND = ITEMS.register("frostbolt_wand",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.FROST, 500));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.FROST, 150, false));
 
     public static final Supplier<Item> WEBCASTER = ITEMS.register("webcaster",
-        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.WEB, 450));
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.WEB, 140, false));
 
-    // Utility & Mobility Artifacts
+    // Basic Utility Artifacts
     public static final Supplier<Item> VOID_TRANSLOCATOR = ITEMS.register("void_translocator",
-        () -> new VoidTranslocatorItem(250));
+        () -> new VoidTranslocatorItem(80, 24.0D, false));
 
     public static final Supplier<Item> MAGIC_MIRROR = ITEMS.register("magic_mirror",
-        () -> new MagicMirrorItem(100));
+        () -> new MagicMirrorItem(40, false));
+
+    // Netherite Upgraded Combat Staves
+    public static final Supplier<Item> NETHERITE_DRAGONFIRE_SCEPTER = ITEMS.register("netherite_dragonfire_scepter",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.DRAGONFIRE, 500, true));
+
+    public static final Supplier<Item> NETHERITE_RESONANT_ECHO = ITEMS.register("netherite_resonant_echo",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.ECHO, 500, true));
+
+    public static final Supplier<Item> NETHERITE_INFERNO_ROD = ITEMS.register("netherite_inferno_rod",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.INFERNO, 550, true));
+
+    public static final Supplier<Item> NETHERITE_GHASTFIRE_STAFF = ITEMS.register("netherite_ghastfire_staff",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.GHASTFIRE, 450, true));
+
+    public static final Supplier<Item> NETHERITE_WITHER_SCEPTER = ITEMS.register("netherite_wither_scepter",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.WITHER, 500, true));
+
+    public static final Supplier<Item> NETHERITE_SHULKER_SEEKER = ITEMS.register("netherite_shulker_seeker",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.SHULKER, 500, true));
+
+    public static final Supplier<Item> NETHERITE_GUARDIAN_LENS = ITEMS.register("netherite_guardian_lens",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.GUARDIAN, 500, true));
+
+    public static final Supplier<Item> NETHERITE_EVOKER_FANG_STAFF = ITEMS.register("netherite_evoker_fang_staff",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.EVOKER, 450, true));
+
+    public static final Supplier<Item> NETHERITE_STORMCALLER = ITEMS.register("netherite_stormcaller",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.LIGHTNING, 500, true));
+
+    public static final Supplier<Item> NETHERITE_FROSTBOLT_WAND = ITEMS.register("netherite_frostbolt_wand",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.FROST, 500, true));
+
+    public static final Supplier<Item> NETHERITE_WEBCASTER = ITEMS.register("netherite_webcaster",
+        () -> new ArcaneStaffItem(ArcaneStaffItem.Kind.WEB, 500, true));
+
+    // Netherite Upgraded Utility Artifacts
+    public static final Supplier<Item> NETHERITE_VOID_TRANSLOCATOR = ITEMS.register("netherite_void_translocator",
+        () -> new VoidTranslocatorItem(250, 36.0D, true));
+
+    public static final Supplier<Item> NETHERITE_MAGIC_MIRROR = ITEMS.register("netherite_magic_mirror",
+        () -> new MagicMirrorItem(150, true));
 
     // Creative Tab
     public static final Supplier<CreativeModeTab> TAB = CREATIVE_MODE_TABS.register("velorise_staves_tab",
         () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.velorise_staves"))
-            .icon(() -> new ItemStack(DRAGONFIRE_SCEPTER.get()))
+            .icon(() -> new ItemStack(NETHERITE_DRAGONFIRE_SCEPTER.get()))
             .displayItems((parameters, output) -> {
+                // Basic tier
                 output.accept(DRAGONFIRE_SCEPTER.get());
                 output.accept(RESONANT_ECHO.get());
                 output.accept(INFERNO_ROD.get());
@@ -88,6 +130,21 @@ public final class VeloriseStavesMod {
                 output.accept(WEBCASTER.get());
                 output.accept(VOID_TRANSLOCATOR.get());
                 output.accept(MAGIC_MIRROR.get());
+
+                // Netherite tier
+                output.accept(NETHERITE_DRAGONFIRE_SCEPTER.get());
+                output.accept(NETHERITE_RESONANT_ECHO.get());
+                output.accept(NETHERITE_INFERNO_ROD.get());
+                output.accept(NETHERITE_GHASTFIRE_STAFF.get());
+                output.accept(NETHERITE_WITHER_SCEPTER.get());
+                output.accept(NETHERITE_SHULKER_SEEKER.get());
+                output.accept(NETHERITE_GUARDIAN_LENS.get());
+                output.accept(NETHERITE_EVOKER_FANG_STAFF.get());
+                output.accept(NETHERITE_STORMCALLER.get());
+                output.accept(NETHERITE_FROSTBOLT_WAND.get());
+                output.accept(NETHERITE_WEBCASTER.get());
+                output.accept(NETHERITE_VOID_TRANSLOCATOR.get());
+                output.accept(NETHERITE_MAGIC_MIRROR.get());
             })
             .build());
 
