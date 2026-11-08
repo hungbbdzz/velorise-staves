@@ -1,0 +1,24 @@
+﻿{
+    "key":  {
+                "D":  {
+                          "item":  "minecraft:dragon_breath"
+                      },
+                "S":  {
+                          "item":  "minecraft:crying_obsidian"
+                      },
+                "B":  {
+                          "item":  "minecraft:blaze_rod"
+                      }
+            },
+    "pattern":  [
+                    "  D",
+                    " B ",
+                    "S  "
+                ],
+    "result":  {
+                   "id":  "velorise_staves:dragonfire_scepter",
+                   "count":  1
+               },
+    "type":  "minecraft:crafting_shaped"
+}
+

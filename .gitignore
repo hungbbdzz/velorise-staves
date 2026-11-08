@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+bin/
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+# Minecraft / NeoForge / Fabric run directories
+run/
+logs/
+*.log
+*.log.gz
+crash-reports/
+
+# OS specific files
+.DS_Store
+Thumbs.db
