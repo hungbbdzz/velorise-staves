@@ -1,21 +1,24 @@
 ﻿{
+    "type":  "minecraft:crafting_shaped",
+    "category":  "equipment",
+    "pattern":  [
+                    " DB",
+                    "DCD",
+                    "BD "
+                ],
     "key":  {
-                "G":  {
-                          "item":  "minecraft:gold_ingot"
+                "D":  {
+                          "item":  "minecraft:diamond"
                       },
-                "E":  {
-                          "item":  "minecraft:ender_pearl"
+                "C":  {
+                          "item":  "minecraft:diamond_block"
+                      },
+                "B":  {
+                          "item":  "minecraft:glass"
                       }
             },
-    "pattern":  [
-                    " G ",
-                    "GEG",
-                    " G "
-                ],
     "result":  {
                    "id":  "velorise_staves:magic_mirror",
                    "count":  1
-               },
-    "type":  "minecraft:crafting_shaped"
+               }
 }
-

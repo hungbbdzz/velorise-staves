@@ -40,19 +40,11 @@
   "item.velorise_staves.magic_mirror": "Magic Mirror",
   "item.velorise_staves.magic_mirror.desc": "Hold right-click to channel and teleport back to your spawn point or bed.",
 
-  "item.velorise_staves.attraction_catalyst": "Attraction Catalyst",
-  "item.velorise_staves.attraction_catalyst.desc": "Right-click to toggle a magnetic field that pulls dropped items and experience orbs.",
-
-  "tooltip.velorise_staves.active": "§aActive",
-  "tooltip.velorise_staves.inactive": "§7Inactive",
   "tooltip.velorise_staves.cooldown": "§8Cooldown: §7%ss",
-  "tooltip.velorise_staves.toggle_hint": "§7Right-click to toggle: %s",
 
   "message.velorise_staves.mirror_teleport": "§aTeleported home!",
   "message.velorise_staves.mirror_no_spawn": "§cNo respawn point found; returning to world spawn.",
   "message.velorise_staves.translocator_blocked": "§cDestination is obstructed or out of range.",
-  "message.velorise_staves.catalyst_enabled": "§aAttraction Catalyst enabled.",
-  "message.velorise_staves.catalyst_disabled": "§cAttraction Catalyst disabled.",
 
   "subtitles.velorise_staves.magic_mirror_use": "Magic Mirror chimes"
 }

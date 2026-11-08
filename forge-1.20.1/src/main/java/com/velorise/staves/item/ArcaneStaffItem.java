@@ -1,0 +1,474 @@
+package com.velorise.staves.item;
+
+import com.velorise.staves.event.ArcaneStaffEvents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.DragonFireball;
+import net.minecraft.world.entity.projectile.EvokerFangs;
+import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ShulkerBullet;
+import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Comparator;
+import java.util.List;
+
+/** Standalone magic staves powered by vanilla durability and cooldowns. */
+public final class ArcaneStaffItem extends Item {
+    private static final String TAG_INFERNO_SHOTS = "ArcaneStaffInfernoShots";
+    private static final String TAG_INFERNO_LAST = "ArcaneStaffInfernoLast";
+    private static final String TAG_WEB_SHOTS = "ArcaneStaffWebShots";
+    private static final String TAG_WEB_LAST = "ArcaneStaffWebLast";
+    private static final String TAG_WITHER_SHOTS = "ArcaneStaffWitherShots";
+    private static final String TAG_WITHER_LAST = "ArcaneStaffWitherLast";
+    private static final String TAG_FROST_SHOTS = "ArcaneStaffFrostShots";
+    private static final String TAG_FROST_LAST = "ArcaneStaffFrostLast";
+
+    public enum Kind {
+        DRAGONFIRE, ECHO, INFERNO, GHASTFIRE,
+        WITHER, SHULKER, GUARDIAN, EVOKER, LIGHTNING, FROST, WEB
+    }
+
+    private final Kind kind;
+
+    public ArcaneStaffItem(Kind kind, int maxDurability) {
+        super(new Item.Properties().stacksTo(1).durability(maxDurability));
+        this.kind = kind;
+    }
+
+    public Kind kind() {
+        return kind;
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (player.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(stack);
+
+        if (isCharged()) {
+            player.startUsingItem(hand);
+            if (!level.isClientSide()) {
+                level.playSound(null, player.blockPosition(),
+                    kind == Kind.ECHO ? SoundEvents.WARDEN_SONIC_CHARGE : SoundEvents.GUARDIAN_AMBIENT,
+                    SoundSource.PLAYERS, 0.8F, kind == Kind.ECHO ? 0.85F : 1.25F);
+            }
+            return InteractionResultHolder.consume(stack);
+        }
+
+        if (level.isClientSide()) return InteractionResultHolder.sidedSuccess(stack, true);
+        if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResultHolder.fail(stack);
+
+        if (kind == Kind.INFERNO && !prepareBurst(serverPlayer, TAG_INFERNO_SHOTS, TAG_INFERNO_LAST, 20, 25)) {
+            return InteractionResultHolder.fail(stack);
+        }
+        if (kind == Kind.WEB && !prepareBurst(serverPlayer, TAG_WEB_SHOTS, TAG_WEB_LAST, 20, 30)) {
+            return InteractionResultHolder.fail(stack);
+        }
+        if (kind == Kind.WITHER && !prepareBurst(serverPlayer, TAG_WITHER_SHOTS, TAG_WITHER_LAST, 20, 35)) {
+            return InteractionResultHolder.fail(stack);
+        }
+        if (kind == Kind.FROST && !prepareBurst(serverPlayer, TAG_FROST_SHOTS, TAG_FROST_LAST, 20, 25)) {
+            return InteractionResultHolder.fail(stack);
+        }
+
+        boolean activated = switch (kind) {
+            case DRAGONFIRE -> shootDragonfire(serverPlayer);
+            case INFERNO -> shootInferno(serverPlayer);
+            case GHASTFIRE -> shootGhastfire(serverPlayer);
+            case WITHER -> shootWither(serverPlayer);
+            case SHULKER -> shootShulker(serverPlayer);
+            case EVOKER -> castFangs(serverPlayer);
+            case LIGHTNING -> castLightning(serverPlayer);
+            case FROST -> shootSnowball(serverPlayer, "frost", 1.45F);
+            case WEB -> shootSnowball(serverPlayer, "web", 1.35F);
+            case ECHO, GUARDIAN -> false;
+        };
+
+        if (!activated) return InteractionResultHolder.fail(stack);
+
+        stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+
+        if (kind == Kind.INFERNO) advanceBurst(serverPlayer, TAG_INFERNO_SHOTS, TAG_INFERNO_LAST, 3, 25);
+        else if (kind == Kind.WEB) advanceBurst(serverPlayer, TAG_WEB_SHOTS, TAG_WEB_LAST, 3, 30);
+        else if (kind == Kind.WITHER) advanceBurst(serverPlayer, TAG_WITHER_SHOTS, TAG_WITHER_LAST, 2, 35);
+        else if (kind == Kind.FROST) advanceBurst(serverPlayer, TAG_FROST_SHOTS, TAG_FROST_LAST, 3, 25);
+        else player.getCooldowns().addCooldown(this, getCooldownTicks());
+
+        player.awardStat(Stats.ITEM_USED.get(this));
+        player.swing(hand, true);
+        return InteractionResultHolder.consume(stack);
+    }
+
+    private boolean isCharged() {
+        return kind == Kind.ECHO || kind == Kind.GUARDIAN;
+    }
+
+    private int getCooldownTicks() {
+        return switch (kind) {
+            case DRAGONFIRE -> 30;
+            case ECHO -> 50;
+            case INFERNO -> 25;
+            case GHASTFIRE -> 40;
+            case WITHER -> 35;
+            case SHULKER -> 35;
+            case GUARDIAN -> 30;
+            case EVOKER -> 30;
+            case LIGHTNING -> 30;
+            case FROST -> 25;
+            case WEB -> 30;
+        };
+    }
+
+    private boolean prepareBurst(ServerPlayer player, String tagShots, String tagLast, int resetTicks, int cdTicks) {
+        int shots = player.getPersistentData().getInt(tagShots);
+        if (shots <= 0) return true;
+        long elapsed = player.level().getGameTime() - player.getPersistentData().getLong(tagLast);
+        if (elapsed <= resetTicks) return true;
+
+        player.getPersistentData().remove(tagShots);
+        player.getPersistentData().remove(tagLast);
+        player.getCooldowns().addCooldown(this, cdTicks);
+        return false;
+    }
+
+    private void advanceBurst(ServerPlayer player, String tagShots, String tagLast, int maxShots, int cdTicks) {
+        int shots = player.getPersistentData().getInt(tagShots) + 1;
+        player.getPersistentData().putLong(tagLast, player.level().getGameTime());
+        if (shots >= maxShots) {
+            player.getPersistentData().remove(tagShots);
+            player.getPersistentData().remove(tagLast);
+            player.getCooldowns().addCooldown(this, cdTicks);
+        } else {
+            player.getPersistentData().putInt(tagShots, shots);
+            player.getCooldowns().addCooldown(this, 4);
+        }
+    }
+
+    @Override
+    public int getUseDuration(ItemStack stack) {
+        if (kind == Kind.GUARDIAN) return 50;
+        return isCharged() ? 25 : 0;
+    }
+
+    @Override
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return isCharged() ? UseAnim.BOW : UseAnim.NONE;
+    }
+
+    @Override
+    public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int count) {
+        if (!isCharged() || level.isClientSide() || !(level instanceof ServerLevel serverLevel)) return;
+        if (kind == Kind.GUARDIAN) {
+            int elapsed = 50 - count;
+            if (elapsed <= 0 || elapsed % 5 != 0 || !(entity instanceof ServerPlayer player)) return;
+            LivingEntity target = findTarget(player, 24.0D, 1.2D);
+            fireGuardian(player, target);
+            if (elapsed % 10 == 0) {
+                stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+            }
+            return;
+        }
+        if (count % 5 != 0) return;
+        Vec3 eye = entity.getEyePosition();
+        serverLevel.sendParticles(ParticleTypes.SCULK_CHARGE_POP, eye.x, eye.y, eye.z, 2, 0.18D, 0.18D, 0.18D, 0.02D);
+    }
+
+    @Override
+    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+        if (!isCharged() || level.isClientSide() || !(entity instanceof ServerPlayer player)) return stack;
+        if (kind == Kind.GUARDIAN) {
+            finishGuardianBeam(player);
+            return stack;
+        }
+        fireEcho(player);
+        stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+        player.getCooldowns().addCooldown(this, getCooldownTicks());
+        player.awardStat(Stats.ITEM_USED.get(this));
+        return stack;
+    }
+
+    @Override
+    public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
+        if (kind == Kind.GUARDIAN && !level.isClientSide() && entity instanceof ServerPlayer player && timeLeft < 50) {
+            finishGuardianBeam(player);
+        }
+    }
+
+    private void finishGuardianBeam(ServerPlayer player) {
+        player.getCooldowns().addCooldown(this, getCooldownTicks());
+        player.awardStat(Stats.ITEM_USED.get(this));
+    }
+
+    private static boolean shootDragonfire(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        DragonFireball projectile = EntityType.DRAGON_FIREBALL.create(level);
+        if (projectile == null) return false;
+        prepareProjectile(projectile, player, "dragonfire", 32.0D, 1.35F);
+        level.addFreshEntity(projectile);
+        level.playSound(null, player.blockPosition(), SoundEvents.ENDER_DRAGON_SHOOT, SoundSource.PLAYERS, 0.9F, 1.0F);
+        return true;
+    }
+
+    private static boolean shootGhastfire(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        LargeFireball projectile = EntityType.FIREBALL.create(level);
+        if (projectile == null) return false;
+        prepareProjectile(projectile, player, "ghastfire", 36.0D, 1.2F);
+        level.addFreshEntity(projectile);
+        level.playSound(null, player.blockPosition(), SoundEvents.GHAST_SHOOT, SoundSource.PLAYERS, 0.9F, 1.0F);
+        return true;
+    }
+
+    private static boolean shootInferno(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        SmallFireball projectile = EntityType.SMALL_FIREBALL.create(level);
+        if (projectile == null) return false;
+        prepareProjectile(projectile, player, "inferno", 30.0D, 1.5F);
+        level.addFreshEntity(projectile);
+        level.playSound(null, player.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.9F, 1.0F);
+        return true;
+    }
+
+    private static boolean shootWither(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        int skulls = 3;
+        int spawned = 0;
+        for (int i = 0; i < skulls; i++) {
+            WitherSkull projectile = EntityType.WITHER_SKULL.create(level);
+            if (projectile == null) continue;
+            Vec3 direction = fanDirection(player.getLookAngle(), i, skulls, 12.0F);
+            prepareProjectile(projectile, player, "wither", 32.0D, 1.25F, direction);
+            level.addFreshEntity(projectile);
+            spawned++;
+        }
+        if (spawned <= 0) return false;
+        level.playSound(null, player.blockPosition(), SoundEvents.WITHER_SHOOT, SoundSource.PLAYERS, 0.85F, 1.15F);
+        return true;
+    }
+
+    private static boolean shootShulker(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        double range = 30.0D;
+        LivingEntity target = findTarget(player, range, 1.5D);
+        int shots = 2;
+        int spawned = 0;
+        for (int i = 0; i < shots; i++) {
+            Vec3 direction = fanDirection(player.getLookAngle(), i, shots, 9.0F);
+            ShulkerBullet projectile;
+            if (target != null) {
+                projectile = new ShulkerBullet(level, player, target, Direction.Axis.Y);
+            } else {
+                projectile = new ShulkerBullet(EntityType.SHULKER_BULLET, level);
+                projectile.setOwner(player);
+                Vec3 spawnPos = player.getEyePosition().add(direction.scale(0.8D));
+                projectile.moveTo(spawnPos.x, spawnPos.y, spawnPos.z, player.getYRot(), player.getXRot());
+                projectile.setDeltaMovement(direction.scale(1.25D));
+            }
+            prepareProjectile(projectile, player, "shulker", range, 1.25F, direction);
+            level.addFreshEntity(projectile);
+            spawned++;
+        }
+        if (spawned <= 0) return false;
+        level.playSound(null, player.blockPosition(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 0.8F, 1.15F);
+        return true;
+    }
+
+    private static boolean shootSnowball(ServerPlayer player, String kind, float velocity) {
+        ServerLevel level = (ServerLevel) player.level();
+        Snowball projectile = EntityType.SNOWBALL.create(level);
+        if (projectile == null) return false;
+        prepareProjectile(projectile, player, kind, 28.0D, velocity);
+        level.addFreshEntity(projectile);
+        level.playSound(null, player.blockPosition(),
+            "web".equals(kind) ? SoundEvents.SPIDER_AMBIENT : SoundEvents.SNOW_GOLEM_SHOOT,
+            SoundSource.PLAYERS, 0.7F, "web".equals(kind) ? 1.45F : 1.1F);
+        return true;
+    }
+
+    private static void prepareProjectile(Projectile projectile, ServerPlayer player, String kind, double range, float velocity) {
+        prepareProjectile(projectile, player, kind, range, velocity, player.getLookAngle());
+    }
+
+    private static void prepareProjectile(Projectile projectile, ServerPlayer player, String kind, double range, float velocity, Vec3 direction) {
+        Vec3 shot = direction.normalize();
+        projectile.setOwner(player);
+        projectile.setPos(player.getX(), player.getEyeY() - 0.1D, player.getZ());
+        projectile.shoot(shot.x, shot.y, shot.z, velocity, 0.0F);
+        projectile.getPersistentData().putString(ArcaneStaffEvents.TAG_KIND, kind);
+        ArcaneStaffEvents.markRange(projectile, player.position(), range);
+    }
+
+    private static Vec3 fanDirection(Vec3 look, int index, int count, float totalSpreadDegrees) {
+        if (count <= 1) return look.normalize();
+        float step = totalSpreadDegrees / (count - 1);
+        float angle = -totalSpreadDegrees * 0.5F + step * index;
+        return look.yRot((float)Math.toRadians(angle)).normalize();
+    }
+
+    private static boolean castFangs(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        Vec3 direction = player.getLookAngle();
+        Vec3 flat = new Vec3(direction.x, 0.0D, direction.z);
+        if (flat.lengthSqr() < 0.001D) flat = new Vec3(0.0D, 0.0D, 1.0D);
+        flat = flat.normalize();
+        int count = 9;
+        float yaw = (float)Math.atan2(flat.z, flat.x);
+
+        for (int i = 0; i < count; i++) {
+            double distance = 1.5D + i * 1.5D;
+            double x = player.getX() + flat.x * distance;
+            double z = player.getZ() + flat.z * distance;
+            double y = findGroundY(level, x, player.getY(), z);
+            level.addFreshEntity(new EvokerFangs(level, x, y, z, yaw, i * 2, player));
+        }
+        level.playSound(null, player.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 1.0F, 1.0F);
+        return true;
+    }
+
+    private static double findGroundY(ServerLevel level, double x, double originY, double z) {
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos((int)Math.floor(x), (int)Math.floor(originY) + 2, (int)Math.floor(z));
+        for (int i = 0; i < 7; i++) {
+            BlockPos below = cursor.below();
+            if (!level.getBlockState(below).getCollisionShape(level, below).isEmpty()
+                && level.getBlockState(cursor).getCollisionShape(level, cursor).isEmpty()) {
+                return below.getY() + 1.0D;
+            }
+            cursor.move(Direction.DOWN);
+        }
+        return originY;
+    }
+
+    private static boolean castLightning(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        double range = 32.0D;
+        LivingEntity target = findTarget(player, range, 1.3D);
+        Vec3 impact = target != null ? target.getBoundingBox().getCenter() : rayEnd(player, range);
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+        if (bolt != null) {
+            bolt.setPos(impact.x, impact.y, impact.z);
+            bolt.setCause(player);
+            bolt.setVisualOnly(true);
+            level.addFreshEntity(bolt);
+        }
+        ArcaneStaffEvents.resolveLightning(level, impact, player);
+        return true;
+    }
+
+    private static Vec3 rayEnd(ServerPlayer player, double range) {
+        Vec3 start = player.getEyePosition();
+        Vec3 end = start.add(player.getLookAngle().scale(range));
+        BlockHitResult hit = player.level().clip(new ClipContext(start, end,
+            ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+        return hit.getType() == HitResult.Type.MISS ? end : hit.getLocation();
+    }
+
+    private static void fireGuardian(ServerPlayer player, LivingEntity target) {
+        ServerLevel level = (ServerLevel) player.level();
+        Vec3 start = player.getEyePosition();
+        Vec3 end = target == null ? rayEnd(player, 24.0D) : target.getBoundingBox().getCenter();
+        if (target != null) {
+            target.hurt(level.damageSources().magic(), 2.5F);
+        }
+        drawBeam(level, start, end, ParticleTypes.ELECTRIC_SPARK, 0.45D);
+        level.playSound(null, player.blockPosition(), SoundEvents.GUARDIAN_ATTACK, SoundSource.PLAYERS, 0.9F, 1.2F);
+    }
+
+    private static void fireEcho(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        Vec3 start = player.getEyePosition();
+        Vec3 direction = player.getLookAngle().normalize();
+        double range = 28.0D;
+        double beamRadius = 2.0D;
+        AABB search = player.getBoundingBox().expandTowards(direction.scale(range)).inflate(beamRadius + 1.0D);
+
+        List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, search,
+                target -> target.isAlive() && target != player)
+            .stream()
+            .filter(target -> distanceFromRay(start, direction, target.getBoundingBox().getCenter(), range)
+                <= beamRadius + target.getBbWidth() * 0.5D)
+            .sorted(Comparator.comparingDouble(target -> projection(start, direction, target.getBoundingBox().getCenter())))
+            .toList();
+
+        float damage = 22.0F;
+        for (LivingEntity target : targets) {
+            target.hurt(level.damageSources().magic(), damage);
+        }
+        Vec3 end = start.add(direction.scale(range));
+        drawBeam(level, start, end, ParticleTypes.SONIC_BOOM, 1.5D);
+        level.playSound(null, player.blockPosition(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.0F, 0.9F);
+    }
+
+    private static void drawBeam(ServerLevel level, Vec3 start, Vec3 end,
+                                 net.minecraft.core.particles.SimpleParticleType particle, double spacing) {
+        Vec3 delta = end.subtract(start);
+        double length = delta.length();
+        if (length <= 0.001D) return;
+        Vec3 direction = delta.scale(1.0D / length);
+        for (double d = 0.5D; d <= length; d += spacing) {
+            Vec3 point = start.add(direction.scale(d));
+            level.sendParticles(particle, point.x, point.y, point.z, 1, 0, 0, 0, 0);
+        }
+    }
+
+    private static LivingEntity findTarget(ServerPlayer player, double range, double beamRadius) {
+        Vec3 start = player.getEyePosition();
+        Vec3 direction = player.getLookAngle().normalize();
+        AABB search = player.getBoundingBox().expandTowards(direction.scale(range)).inflate(beamRadius + 2.0D);
+        return ((ServerLevel) player.level()).getEntitiesOfClass(LivingEntity.class, search,
+                target -> target.isAlive() && target != player && player.hasLineOfSight(target))
+            .stream()
+            .filter(target -> distanceFromRay(start, direction, target.getBoundingBox().getCenter(), range)
+                <= beamRadius + target.getBbWidth() * 0.5D)
+            .min(Comparator.comparingDouble(target -> projection(start, direction, target.getBoundingBox().getCenter())))
+            .orElse(null);
+    }
+
+    private static double projection(Vec3 start, Vec3 direction, Vec3 point) {
+        return point.subtract(start).dot(direction);
+    }
+
+    private static double distanceFromRay(Vec3 start, Vec3 direction, Vec3 point, double range) {
+        double projection = projection(start, direction, point);
+        if (projection < 0.0D || projection > range) return Double.MAX_VALUE;
+        return point.distanceTo(start.add(direction.scale(projection)));
+    }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+        tooltip.add(Component.translatable(getDescriptionId() + ".desc").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("tooltip.velorise_staves.cooldown", String.format("%.1f", getCooldownTicks() / 20.0F)));
+    }
+}

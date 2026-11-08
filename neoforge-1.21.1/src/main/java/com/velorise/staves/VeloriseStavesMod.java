@@ -1,7 +1,6 @@
 package com.velorise.staves;
 
 import com.velorise.staves.item.ArcaneStaffItem;
-import com.velorise.staves.item.AttractionCatalystItem;
 import com.velorise.staves.item.MagicMirrorItem;
 import com.velorise.staves.item.VoidTranslocatorItem;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -70,9 +69,6 @@ public final class VeloriseStavesMod {
     public static final Supplier<Item> MAGIC_MIRROR = ITEMS.register("magic_mirror",
         () -> new MagicMirrorItem(100));
 
-    public static final Supplier<Item> ATTRACTION_CATALYST = ITEMS.register("attraction_catalyst",
-        AttractionCatalystItem::new);
-
     // Creative Tab
     public static final Supplier<CreativeModeTab> TAB = CREATIVE_MODE_TABS.register("velorise_staves_tab",
         () -> CreativeModeTab.builder()
@@ -92,7 +88,6 @@ public final class VeloriseStavesMod {
                 output.accept(WEBCASTER.get());
                 output.accept(VOID_TRANSLOCATOR.get());
                 output.accept(MAGIC_MIRROR.get());
-                output.accept(ATTRACTION_CATALYST.get());
             })
             .build());
 

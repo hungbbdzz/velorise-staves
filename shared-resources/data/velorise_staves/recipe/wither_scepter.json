@@ -1,24 +1,21 @@
 ﻿{
+    "type":  "minecraft:crafting_shaped",
+    "category":  "equipment",
+    "pattern":  [
+                    "  W",
+                    " B ",
+                    "B  "
+                ],
     "key":  {
                 "W":  {
                           "item":  "minecraft:wither_skeleton_skull"
-                      },
-                "S":  {
-                          "item":  "minecraft:soul_sand"
                       },
                 "B":  {
                           "item":  "minecraft:blaze_rod"
                       }
             },
-    "pattern":  [
-                    "  W",
-                    " B ",
-                    "S  "
-                ],
     "result":  {
                    "id":  "velorise_staves:wither_scepter",
                    "count":  1
-               },
-    "type":  "minecraft:crafting_shaped"
+               }
 }
-

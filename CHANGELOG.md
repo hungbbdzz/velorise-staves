@@ -23,9 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Stormcaller`: Calls down lightning bolts at the crosshair.
   - `Frostbolt Wand`: Freezing ice projectile with severe slowness & freeze ticks.
   - `Webcaster`: Fires clusters of trapping venomous cobwebs.
-- **3 Mobility & Utility Items**:
+- **2 Mobility & Utility Artifacts**:
   - `Void Translocator`: Safe forward blink teleportation.
   - `Magic Mirror`: Channeled recall home to bed or world spawn.
-  - `Attraction Catalyst`: Toggleable item & experience orb magnet.
+- **Multi-Loader Support**:
+  - Added **Forge 1.20.1** port (`forge-1.20.1`, Java 17).
+  - Added **NeoForge 1.21.1** loader (`neoforge-1.21.1`, Java 21).
+  - Built-in JEI dev integration for rapid recipe inspection.
 - Balanced around **Vanilla Cooldowns & Durability** (fully compatible with `Unbreaking` and `Mending`).
 - Complete localization for English (`en_us`) and Vietnamese (`vi_vn`).
+- Added 25% Echo Shard drop chance when slaying Warden.
