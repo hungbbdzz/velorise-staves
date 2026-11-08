@@ -23,8 +23,8 @@ import java.util.List;
 
 /** Recall artifact that channels and returns the player to their bed or spawn. */
 public class MagicMirrorItem extends Item {
-    private static final int USE_DURATION_TICKS = 30; // 1.5 seconds
-    private static final int COOLDOWN_TICKS = 100; // 5 seconds
+    private static final int USE_DURATION_TICKS = 50; // 2.5 seconds
+    private static final int COOLDOWN_TICKS = 300; // 15.0 seconds
 
     private record Target(ServerLevel level, Vec3 pos, float angle, boolean bedObstructed) {}
 

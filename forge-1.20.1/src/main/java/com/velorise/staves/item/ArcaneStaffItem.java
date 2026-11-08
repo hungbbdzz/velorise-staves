@@ -86,16 +86,16 @@ public final class ArcaneStaffItem extends Item {
         if (level.isClientSide()) return InteractionResultHolder.sidedSuccess(stack, true);
         if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResultHolder.fail(stack);
 
-        if (kind == Kind.INFERNO && !prepareBurst(serverPlayer, TAG_INFERNO_SHOTS, TAG_INFERNO_LAST, 20, 25)) {
+        if (kind == Kind.INFERNO && !prepareBurst(serverPlayer, TAG_INFERNO_SHOTS, TAG_INFERNO_LAST, 20, getCooldownTicks())) {
             return InteractionResultHolder.fail(stack);
         }
-        if (kind == Kind.WEB && !prepareBurst(serverPlayer, TAG_WEB_SHOTS, TAG_WEB_LAST, 20, 30)) {
+        if (kind == Kind.WEB && !prepareBurst(serverPlayer, TAG_WEB_SHOTS, TAG_WEB_LAST, 20, getCooldownTicks())) {
             return InteractionResultHolder.fail(stack);
         }
-        if (kind == Kind.WITHER && !prepareBurst(serverPlayer, TAG_WITHER_SHOTS, TAG_WITHER_LAST, 20, 35)) {
+        if (kind == Kind.WITHER && !prepareBurst(serverPlayer, TAG_WITHER_SHOTS, TAG_WITHER_LAST, 20, getCooldownTicks())) {
             return InteractionResultHolder.fail(stack);
         }
-        if (kind == Kind.FROST && !prepareBurst(serverPlayer, TAG_FROST_SHOTS, TAG_FROST_LAST, 20, 25)) {
+        if (kind == Kind.FROST && !prepareBurst(serverPlayer, TAG_FROST_SHOTS, TAG_FROST_LAST, 20, getCooldownTicks())) {
             return InteractionResultHolder.fail(stack);
         }
 
@@ -116,10 +116,10 @@ public final class ArcaneStaffItem extends Item {
 
         stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
 
-        if (kind == Kind.INFERNO) advanceBurst(serverPlayer, TAG_INFERNO_SHOTS, TAG_INFERNO_LAST, 3, 25);
-        else if (kind == Kind.WEB) advanceBurst(serverPlayer, TAG_WEB_SHOTS, TAG_WEB_LAST, 3, 30);
-        else if (kind == Kind.WITHER) advanceBurst(serverPlayer, TAG_WITHER_SHOTS, TAG_WITHER_LAST, 2, 35);
-        else if (kind == Kind.FROST) advanceBurst(serverPlayer, TAG_FROST_SHOTS, TAG_FROST_LAST, 3, 25);
+        if (kind == Kind.INFERNO) advanceBurst(serverPlayer, TAG_INFERNO_SHOTS, TAG_INFERNO_LAST, 3, getCooldownTicks());
+        else if (kind == Kind.WEB) advanceBurst(serverPlayer, TAG_WEB_SHOTS, TAG_WEB_LAST, 3, getCooldownTicks());
+        else if (kind == Kind.WITHER) advanceBurst(serverPlayer, TAG_WITHER_SHOTS, TAG_WITHER_LAST, 2, getCooldownTicks());
+        else if (kind == Kind.FROST) advanceBurst(serverPlayer, TAG_FROST_SHOTS, TAG_FROST_LAST, 3, getCooldownTicks());
         else player.getCooldowns().addCooldown(this, getCooldownTicks());
 
         player.awardStat(Stats.ITEM_USED.get(this));
@@ -133,17 +133,17 @@ public final class ArcaneStaffItem extends Item {
 
     private int getCooldownTicks() {
         return switch (kind) {
-            case DRAGONFIRE -> 30;
-            case ECHO -> 50;
-            case INFERNO -> 25;
-            case GHASTFIRE -> 40;
-            case WITHER -> 35;
-            case SHULKER -> 35;
-            case GUARDIAN -> 30;
-            case EVOKER -> 30;
-            case LIGHTNING -> 30;
-            case FROST -> 25;
-            case WEB -> 30;
+            case DRAGONFIRE -> 160; // 8.0s
+            case ECHO -> 160;       // 8.0s
+            case INFERNO -> 80;     // 4.0s
+            case GHASTFIRE -> 100;  // 5.0s
+            case WITHER -> 120;     // 6.0s
+            case SHULKER -> 120;    // 6.0s
+            case GUARDIAN -> 100;   // 5.0s
+            case EVOKER -> 100;     // 5.0s
+            case LIGHTNING -> 120;  // 6.0s
+            case FROST -> 80;       // 4.0s
+            case WEB -> 100;        // 5.0s
         };
     }
 
@@ -175,7 +175,7 @@ public final class ArcaneStaffItem extends Item {
     @Override
     public int getUseDuration(ItemStack stack) {
         if (kind == Kind.GUARDIAN) return 50;
-        return isCharged() ? 25 : 0;
+        return isCharged() ? 30 : 0;
     }
 
     @Override

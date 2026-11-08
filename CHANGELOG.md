@@ -31,4 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added **NeoForge 1.21.1** loader (`neoforge-1.21.1`, Java 21).
   - Built-in JEI dev integration for rapid recipe inspection.
 - Balanced around **Vanilla Cooldowns & Durability** (fully compatible with `Unbreaking` and `Mending`).
+  - Combat staves cooldowns rebalanced to 4.0s - 8.0s for authentic tactical magic pacing.
+  - Mobility artifacts rebalanced: Void Translocator (5.0s cooldown), Magic Mirror (2.5s channel, 15.0s cooldown).
 - Complete localization for English (`en_us`) and Vietnamese (`vi_vn`).

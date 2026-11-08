@@ -27,7 +27,7 @@ import java.util.List;
 /** Short-range blink teleportation tool powered by durability and cooldown. */
 public class VoidTranslocatorItem extends Item {
     private static final double RANGE = 24.0D;
-    private static final int COOLDOWN_TICKS = 40;
+    private static final int COOLDOWN_TICKS = 100; // 5.0 seconds
 
     public VoidTranslocatorItem(int maxDurability) {
         super(new Item.Properties().stacksTo(1).durability(maxDurability));
