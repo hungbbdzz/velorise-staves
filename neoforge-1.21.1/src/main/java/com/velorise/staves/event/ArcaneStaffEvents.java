@@ -2,7 +2,6 @@ package com.velorise.staves.event;
 
 import com.velorise.staves.VeloriseStavesMod;
 import com.velorise.staves.item.ArcaneStaffItem;
-import com.velorise.staves.manager.DragonfireCloudManager;
 import com.velorise.staves.manager.TemporaryWebManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -12,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -81,14 +81,21 @@ public final class ArcaneStaffEvents {
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
-        DragonfireCloudManager.tick(event.getServer());
         TemporaryWebManager.tick(event.getServer());
     }
 
     private static void resolveDragonfire(ServerLevel level, Vec3 hit, Entity owner) {
-        if (owner instanceof ServerPlayer player) {
-            DragonfireCloudManager.spawn(level, hit, player);
+        AreaEffectCloud cloud = new AreaEffectCloud(level, hit.x, hit.y, hit.z);
+        if (owner instanceof LivingEntity living) {
+            cloud.setOwner(living);
         }
+        cloud.setParticle(ParticleTypes.DRAGON_BREATH);
+        cloud.setRadius(3.5F);
+        cloud.setDuration(120); // 6 seconds
+        cloud.setRadiusPerTick((4.5F - cloud.getRadius()) / (float) cloud.getDuration());
+        cloud.setWaitTime(10);
+        cloud.addEffect(new MobEffectInstance(MobEffects.HARM, 1, 1));
+        level.addFreshEntity(cloud);
         level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.9F, 1.15F);
     }
 

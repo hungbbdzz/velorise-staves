@@ -117,7 +117,7 @@ public final class ArcaneStaffItem extends Item {
 
         if (kind == Kind.INFERNO) advanceBurst(serverPlayer, TAG_INFERNO_SHOTS, TAG_INFERNO_LAST, 3, getCooldownTicks());
         else if (kind == Kind.WEB) advanceBurst(serverPlayer, TAG_WEB_SHOTS, TAG_WEB_LAST, 3, getCooldownTicks());
-        else if (kind == Kind.WITHER) advanceBurst(serverPlayer, TAG_WITHER_SHOTS, TAG_WITHER_LAST, 2, getCooldownTicks());
+        else if (kind == Kind.WITHER) advanceBurst(serverPlayer, TAG_WITHER_SHOTS, TAG_WITHER_LAST, 3, getCooldownTicks());
         else if (kind == Kind.FROST) advanceBurst(serverPlayer, TAG_FROST_SHOTS, TAG_FROST_LAST, 3, getCooldownTicks());
         else player.getCooldowns().addCooldown(this, getCooldownTicks());
 
@@ -258,17 +258,10 @@ public final class ArcaneStaffItem extends Item {
 
     private static boolean shootWither(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
-        int skulls = 3;
-        int spawned = 0;
-        for (int i = 0; i < skulls; i++) {
-            WitherSkull projectile = EntityType.WITHER_SKULL.create(level);
-            if (projectile == null) continue;
-            Vec3 direction = fanDirection(player.getLookAngle(), i, skulls, 12.0F);
-            prepareProjectile(projectile, player, "wither", 32.0D, 1.25F, direction);
-            level.addFreshEntity(projectile);
-            spawned++;
-        }
-        if (spawned <= 0) return false;
+        WitherSkull projectile = EntityType.WITHER_SKULL.create(level);
+        if (projectile == null) return false;
+        prepareProjectile(projectile, player, "wither", 32.0D, 1.35F);
+        level.addFreshEntity(projectile);
         level.playSound(null, player.blockPosition(), SoundEvents.WITHER_SHOOT, SoundSource.PLAYERS, 0.85F, 1.15F);
         return true;
     }
